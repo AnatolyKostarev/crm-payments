@@ -1,0 +1,19 @@
+{
+  "name": "crm-payments",
+  "private": true,
+  "version": "1.0.0",
+  "description": "CRM для согласования платежей контрагентам",
+  "scripts": {
+    "dev:api": "pnpm --filter @crm/api dev",
+    "dev:web": "pnpm --filter @crm/web dev",
+    "build:shared": "pnpm --filter @crm/shared build",
+    "build:api": "pnpm --filter @crm/api build",
+    "build:web": "pnpm --filter @crm/web build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AnatolyKostarev/crm-payments.git"
+  },
+  "author": "Anatoly Kostarev",
+  "license": "ISC"
+}
