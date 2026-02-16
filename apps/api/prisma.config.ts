@@ -1,0 +1,10 @@
+import { defineConfig } from 'prisma/config'
+
+export default defineConfig({
+  schema: 'prisma/schema.prisma',
+  datasource: {
+    url:
+      process.env.DATABASE_URL ||
+      'postgresql://postgres:123123125@localhost:5432/crm-payments?schema=public',
+  },
+})
