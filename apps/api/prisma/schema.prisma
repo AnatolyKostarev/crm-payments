@@ -6,15 +6,26 @@ datasource db {
   provider = "postgresql"
 }
 
+// ─── TENANT ────────────────────────────────────────
+
 model Tenant {
   id        String   @id @default(uuid())
   name      String
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  users     User[]
+
+  users          User[]
+  roles          Role[]
+  contractors    Contractor[]
+  contracts      Contract[]
+  payments       PaymentRequest[]
+  approvalRoutes ApprovalRoute[]
+  registries     PaymentRegistry[]
 
   @@map("tenants")
 }
+
+// ─── USER & ROLES ──────────────────────────────────
 
 model User {
   id        String   @id @default(uuid())
@@ -26,8 +37,286 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  // Telegram
+  telegramChatId String? @unique @map("telegram_chat_id")
+
+  tenant        Tenant           @relation(fields: [tenantId], references: [id])
+  userRoles     UserRole[]
+  payments      PaymentRequest[] @relation("PaymentAuthor")
+  approvals     Approval[]
+  notifications Notification[]
+  invites       Invite[]
 
   @@index([tenantId])
   @@map("users")
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String
+  permissions Json     // массив Permission values (хранится как JSON)
+  tenantId    String   @map("tenant_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id])
+  userRoles UserRole[]
+
+  @@unique([tenantId, name])
+  @@map("roles")
+}
+
+model UserRole {
+  id     String @id @default(uuid())
+  userId String @map("user_id")
+  roleId String @map("role_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@map("user_roles")
+}
+
+model Invite {
+  id        String    @id @default(uuid())
+  email     String
+  token     String    @unique
+  tenantId  String    @map("tenant_id")
+  roleId    String?   @map("role_id")
+  invitedBy String    @map("invited_by")
+  usedAt    DateTime? @map("used_at")
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  inviter User @relation(fields: [invitedBy], references: [id])
+
+  @@index([token])
+  @@index([tenantId])
+  @@map("invites")
+}
+
+// ─── CONTRACTORS ───────────────────────────────────
+
+model Contractor {
+  id        String   @id @default(uuid())
+  name      String
+  inn       String
+  kpp       String?
+  bankName  String?  @map("bank_name")
+  bik       String?
+  account   String? // расчётный счёт
+  tenantId  String   @map("tenant_id")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant    Tenant           @relation(fields: [tenantId], references: [id])
+  contracts Contract[]
+  payments  PaymentRequest[]
+
+  @@unique([tenantId, inn])
+  @@index([tenantId])
+  @@map("contractors")
+}
+
+model Contract {
+  id           String    @id @default(uuid())
+  number       String
+  date         DateTime
+  endDate      DateTime? @map("end_date")
+  contractorId String    @map("contractor_id")
+  tenantId     String    @map("tenant_id")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  contractor Contractor       @relation(fields: [contractorId], references: [id])
+  tenant     Tenant           @relation(fields: [tenantId], references: [id])
+  payments   PaymentRequest[]
+
+  @@index([tenantId])
+  @@index([contractorId])
+  @@map("contracts")
+}
+
+// ─── PAYMENTS ──────────────────────────────────────
+
+enum PaymentStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  REVISION
+  IN_REGISTRY
+  PAID
+}
+
+model PaymentRequest {
+  id           String        @id @default(uuid())
+  number       Int           @unique // генерируется в коде приложения
+  amount       Float         // денежная сумма (используйте Float вместо Decimal в Prisma 7)
+  currency     String        @default("RUB")
+  purpose      String // назначение платежа
+  dueDate      DateTime?     @map("due_date")
+  status       PaymentStatus @default(DRAFT)
+  authorId     String        @map("author_id")
+  contractorId String        @map("contractor_id")
+  contractId   String?       @map("contract_id")
+  tenantId     String        @map("tenant_id")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  author        User           @relation("PaymentAuthor", fields: [authorId], references: [id])
+  contractor    Contractor     @relation(fields: [contractorId], references: [id])
+  contract      Contract?      @relation(fields: [contractId], references: [id])
+  tenant        Tenant         @relation(fields: [tenantId], references: [id])
+  approvals     Approval[]
+  attachments   Attachment[]
+  registryItems RegistryItem[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, authorId])
+  @@index([tenantId, contractorId])
+  @@map("payment_requests")
+}
+
+// ─── APPROVALS ─────────────────────────────────────
+
+enum ApprovalCondition {
+  ALWAYS
+  AMOUNT_ABOVE
+  AMOUNT_BELOW
+}
+
+enum ApprovalDecision {
+  PENDING
+  APPROVED
+  REJECTED
+  REVISION
+}
+
+model ApprovalRoute {
+  id        String   @id @default(uuid())
+  name      String
+  isActive  Boolean  @default(true) @map("is_active")
+  tenantId  String   @map("tenant_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant         @relation(fields: [tenantId], references: [id])
+  steps  ApprovalStep[]
+
+  @@index([tenantId])
+  @@map("approval_routes")
+}
+
+model ApprovalStep {
+  id         String            @id @default(uuid())
+  stepOrder  Int               @map("step_order")
+  approverId String            @map("approver_id")
+  condition  ApprovalCondition @default(ALWAYS)
+  threshold  Float?            // порог для AMOUNT_ABOVE/BELOW (используйте Float вместо Decimal в Prisma 7)
+  routeId    String            @map("route_id")
+
+  route ApprovalRoute @relation(fields: [routeId], references: [id], onDelete: Cascade)
+
+  @@index([routeId])
+  @@map("approval_steps")
+}
+
+model Approval {
+  id         String           @id @default(uuid())
+  stepOrder  Int              @map("step_order")
+  decision   ApprovalDecision @default(PENDING)
+  comment    String?
+  paymentId  String           @map("payment_id")
+  approverId String           @map("approver_id")
+  decidedAt  DateTime?        @map("decided_at")
+  createdAt  DateTime         @default(now()) @map("created_at")
+
+  payment  PaymentRequest @relation(fields: [paymentId], references: [id])
+  approver User           @relation(fields: [approverId], references: [id])
+
+  @@index([paymentId])
+  @@index([approverId, decision])
+  @@map("approvals")
+}
+
+// ─── REGISTRY ──────────────────────────────────────
+
+enum RegistryStatus {
+  FORMED
+  PAID
+}
+
+model PaymentRegistry {
+  id        String         @id @default(uuid())
+  number    Int            @unique // генерируется в коде приложения
+  status    RegistryStatus @default(FORMED)
+  tenantId  String         @map("tenant_id")
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+
+  tenant Tenant         @relation(fields: [tenantId], references: [id])
+  items  RegistryItem[]
+
+  @@index([tenantId])
+  @@map("payment_registries")
+}
+
+model RegistryItem {
+  id         String @id @default(uuid())
+  registryId String @map("registry_id")
+  paymentId  String @map("payment_id")
+
+  registry PaymentRegistry @relation(fields: [registryId], references: [id], onDelete: Cascade)
+  payment  PaymentRequest  @relation(fields: [paymentId], references: [id])
+
+  @@unique([registryId, paymentId])
+  @@map("registry_items")
+}
+
+// ─── ATTACHMENTS ───────────────────────────────────
+
+model Attachment {
+  id        String   @id @default(uuid())
+  fileName  String   @map("file_name")
+  fileKey   String   @map("file_key") // S3 key
+  fileSize  Int      @map("file_size")
+  mimeType  String   @map("mime_type")
+  paymentId String   @map("payment_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  payment PaymentRequest @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId])
+  @@map("attachments")
+}
+
+// ─── NOTIFICATIONS ─────────────────────────────────
+
+enum NotificationType {
+  APPROVAL_REQUIRED
+  PAYMENT_APPROVED
+  PAYMENT_REJECTED
+  PAYMENT_REVISION
+  PAYMENT_IN_REGISTRY
+  PAYMENT_PAID
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean          @default(false) @map("is_read")
+  userId    String           @map("user_id")
+  paymentId String?          @map("payment_id")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@map("notifications")
 }

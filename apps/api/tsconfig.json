@@ -11,7 +11,8 @@
       "target": "ES2022",
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true,
-      "types": ["node"]
+      "types": ["node"],
+      "useDefineForClassFields": false
     },
     "include": ["src"]
   }
