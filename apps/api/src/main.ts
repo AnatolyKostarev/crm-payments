@@ -8,6 +8,7 @@ import fastifyCookie from '@fastify/cookie'
 import { AppModule } from './app.module'
 import { AllExceptionsFilter } from './common/filters/http-exception.filter'
 import { TransformInterceptor } from './common/interceptors/transform.interceptor'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -45,6 +46,17 @@ async function bootstrap() {
   app.useGlobalInterceptors(new TransformInterceptor())
 
   const port = process.env.PORT || 4000
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('CRM Payments API')
+    .setDescription('API для согласования платежей контрагентам')
+    .setVersion('0.1.0')
+    .addBearerAuth()
+    .build()
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig)
+  SwaggerModule.setup('docs', app, document)
+
   await app.listen(port, '0.0.0.0')
   console.log(`🚀 API running on http://localhost:${port}/api`)
 }

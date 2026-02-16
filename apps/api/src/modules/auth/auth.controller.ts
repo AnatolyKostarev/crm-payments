@@ -14,13 +14,15 @@ import {
 } from '@nestjs/common'
 import { FastifyRequest, FastifyReply } from 'fastify'
 import { AuthService } from './auth.service'
-import { LoginDto, RegisterDto } from '@crm/shared'
+import { RegisterDto } from './dto/register.dto'
+import { LoginDto } from './dto/login.dto'
 import { AcceptInviteDto } from './dto/accept-invite.dto'
 import { InviteDto } from './dto/invite.dto'
 import { CurrentUser } from 'src/common/decorators/current-user.decorator'
 import { RequirePermissions } from 'src/common/decorators/permissions.decorator'
 import { JwtAuthGuard } from 'src/common/decorators/jwt-auth.guard'
 import { PermissionsGuard } from 'src/common/decorators/permissions.guard'
+import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger'
 
 const REFRESH_COOKIE = 'refresh_token'
 const COOKIE_OPTIONS = {
@@ -31,11 +33,14 @@ const COOKIE_OPTIONS = {
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
 }
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
+  @ApiOperation({ summary: 'Регистрация тенанта и администратора' })
+  @ApiBody({ type: RegisterDto })
   async register(
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) res: FastifyReply
@@ -51,6 +56,8 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Авторизация' })
+  @ApiBody({ type: LoginDto })
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: FastifyReply
@@ -67,6 +74,7 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Обновление токена' })
   async refresh(
     @Req() req: FastifyRequest,
     @Res({ passthrough: true }) res: FastifyReply
@@ -87,6 +95,7 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Выход' })
   async logout(@Res({ passthrough: true }) res: FastifyReply) {
     res.clearCookie(REFRESH_COOKIE, { path: '/api/auth' })
     return { message: 'Выход выполнен' }
@@ -95,6 +104,7 @@ export class AuthController {
   @Post('invite')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @RequirePermissions('ADMIN_USERS')
+  @ApiOperation({ summary: 'Создание приглашения' })
   async invite(
     @Body() dto: InviteDto,
     @CurrentUser() user: { id: string; tenantId: string }
@@ -103,6 +113,7 @@ export class AuthController {
   }
 
   @Post('invite/:token')
+  @ApiOperation({ summary: 'Принятие приглашения' })
   async acceptInvite(
     @Param('token') token: string,
     @Body() dto: AcceptInviteDto,
@@ -118,6 +129,7 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Текущий пользователь' })
   async me(@CurrentUser() user: { id: string }) {
     return this.authService.getMe(user.id)
   }
