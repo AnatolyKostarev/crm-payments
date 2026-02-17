@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router'
@@ -34,29 +34,34 @@ export function RegisterForm() {
     mode: 'onBlur',
   })
 
-  const onSubmit = async (data: RegisterFormValues) => {
-    setLoading(true)
-    try {
-      const res = await sessionApi.register(data)
-      setAuth({
-        user: res.data.user,
-        tenant: res.data.tenant,
-        permissions: res.data.permissions || [],
-        accessToken: res.data.accessToken,
-      })
-      toast.success('Компания зарегистрирована!')
-      navigate('/')
-    } catch {
-      toast.error('Ошибка регистрации. Возможно, email уже занят.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const onSubmit = useCallback(
+    async (data: RegisterFormValues) => {
+      setLoading(true)
+      try {
+        const res = await sessionApi.register(data)
+        setAuth({
+          user: res.data.user,
+          tenant: res.data.tenant,
+          permissions: res.data.permissions || [],
+          accessToken: res.data.accessToken,
+        })
+        toast.success('Компания зарегистрирована!')
+        navigate('/')
+      } catch {
+        toast.error('Ошибка регистрации. Возможно, email уже занят.')
+      } finally {
+        setLoading(false)
+      }
+    },
+    [setAuth, navigate],
+  )
+
+  const handleSubmit = form.handleSubmit(onSubmit)
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={handleSubmit}
         className="space-y-4"
       >
         <FormField

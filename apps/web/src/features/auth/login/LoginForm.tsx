@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router'
@@ -33,24 +33,29 @@ export function LoginForm() {
     mode: 'onBlur',
   })
 
-  const onSubmit = async (data: LoginFormValues) => {
-    setLoading(true)
-    try {
-      const res = await sessionApi.login(data)
-      setAuth(res.data)
-      toast.success('Добро пожаловать!')
-      navigate('/')
-    } catch {
-      toast.error('Неверный email или пароль')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const onSubmit = useCallback(
+    async (data: LoginFormValues) => {
+      setLoading(true)
+      try {
+        const res = await sessionApi.login(data)
+        setAuth(res.data)
+        toast.success('Добро пожаловать!')
+        navigate('/')
+      } catch {
+        toast.error('Неверный email или пароль')
+      } finally {
+        setLoading(false)
+      }
+    },
+    [setAuth, navigate],
+  )
+
+  const handleSubmit = form.handleSubmit(onSubmit)
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={handleSubmit}
         className="space-y-4"
       >
         <FormField
