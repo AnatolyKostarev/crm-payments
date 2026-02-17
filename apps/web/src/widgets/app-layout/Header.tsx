@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { LogOut, Bell } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { useAuthStore } from '@/shared/stores/auth.store'
@@ -14,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { ConfirmDialog } from '@/shared/ui/confirm-dialog'
 import {
   Tooltip,
   TooltipContent,
@@ -25,6 +27,7 @@ import { ThemeToggle } from '@/app/providers/theme-toggle'
 export function Header() {
   const { user, tenant, logout } = useAuthStore()
   const navigate = useNavigate()
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
 
   const handleLogout = async () => {
     try {
@@ -116,7 +119,7 @@ export function Header() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={handleLogout}
+              onSelect={() => setLogoutDialogOpen(true)}
               className="text-destructive focus:text-destructive"
             >
               <LogOut className="mr-2 h-4 w-4" />
@@ -124,6 +127,16 @@ export function Header() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <ConfirmDialog
+          open={logoutDialogOpen}
+          onOpenChange={setLogoutDialogOpen}
+          title="Выход из системы"
+          description="Вы уверены, что хотите выйти из аккаунта?"
+          confirmLabel="Выйти"
+          variant="destructive"
+          onConfirm={handleLogout}
+        />
       </div>
     </header>
   )

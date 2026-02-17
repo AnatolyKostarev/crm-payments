@@ -36,13 +36,16 @@ export function AppRouter() {
           </AuthGuard>
         }
       >
-        <Route
-          path="/"
-          element={<DashboardPage />}
-        />
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/payments" element={<div className="text-muted-foreground">Заявки — в разработке</div>} />
+        <Route path="/approvals" element={<div className="text-muted-foreground">Согласование — в разработке</div>} />
+        <Route path="/contractors" element={<div className="text-muted-foreground">Контрагенты — в разработке</div>} />
+        <Route path="/registries" element={<div className="text-muted-foreground">Реестры — в разработке</div>} />
+        <Route path="/settings" element={<div className="text-muted-foreground">Настройки — в разработке</div>} />
+        <Route path="*" element={<NotFoundPage fullScreen={false} />} />
       </Route>
 
-      {/* 404 */}
+      {/* 404 without layout (for unauthenticated) */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )

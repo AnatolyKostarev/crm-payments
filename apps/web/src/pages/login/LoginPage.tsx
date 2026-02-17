@@ -20,6 +20,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -27,8 +28,16 @@ import {
 } from '@/components/ui/form'
 
 const loginSchema = z.object({
-  email: z.string().email('Некорректный email'),
-  password: z.string().min(6, 'Минимум 6 символов'),
+  email: z
+    .string()
+    .min(1, 'Email обязателен')
+    .email('Некорректный формат email')
+    .refine(val => /^[a-zA-Z0-9@._+-]+$/.test(val), 'Только латинские символы'),
+  password: z
+    .string()
+    .min(1, 'Пароль обязателен')
+    .regex(/^[^\u0400-\u04FF]+$/, 'Только латинские символы')
+    .min(6, 'Минимум 6 символов'),
 })
 
 type LoginForm = z.infer<typeof loginSchema>
@@ -44,6 +53,7 @@ export function LoginPage() {
       email: '',
       password: '',
     },
+    mode: 'onBlur',
   })
 
   const onSubmit = async (data: LoginForm) => {
@@ -90,6 +100,7 @@ export function LoginPage() {
                         {...field}
                       />
                     </FormControl>
+                    <FormDescription>Только латинские символы</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -108,6 +119,7 @@ export function LoginPage() {
                         {...field}
                       />
                     </FormControl>
+                    <FormDescription>Минимум 6 символов, латиница</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
