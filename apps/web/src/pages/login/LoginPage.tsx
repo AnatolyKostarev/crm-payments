@@ -9,6 +9,7 @@ import { useAuthStore } from '@/shared/stores/auth.store'
 import { authApi } from '@/shared/api/auth.api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/shared/ui/password-input'
 import {
   Card,
   CardContent,
@@ -112,8 +113,7 @@ export function LoginPage() {
                   <FormItem>
                     <FormLabel>Пароль</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
+                      <PasswordInput
                         placeholder="••••••"
                         autoComplete="current-password"
                         {...field}
