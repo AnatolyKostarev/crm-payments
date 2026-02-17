@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { useSessionStore, sessionApi } from '@/entities/session'
+import { getApiError } from '@/shared/lib/get-api-error'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/shared/ui/password-input'
@@ -47,8 +48,8 @@ export function RegisterForm() {
         })
         toast.success('Компания зарегистрирована!')
         navigate('/')
-      } catch {
-        toast.error('Ошибка регистрации. Возможно, email уже занят.')
+      } catch (error) {
+        toast.error(getApiError(error, 'Ошибка регистрации. Возможно, email уже занят.'))
       } finally {
         setLoading(false)
       }

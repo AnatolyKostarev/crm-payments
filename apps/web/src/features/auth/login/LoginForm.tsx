@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { useSessionStore, sessionApi } from '@/entities/session'
+import { getApiError } from '@/shared/lib/get-api-error'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/shared/ui/password-input'
@@ -41,8 +42,8 @@ export function LoginForm() {
         setAuth(res.data)
         toast.success('Добро пожаловать!')
         navigate('/')
-      } catch {
-        toast.error('Неверный email или пароль')
+      } catch (error) {
+        toast.error(getApiError(error, 'Неверный email или пароль'))
       } finally {
         setLoading(false)
       }

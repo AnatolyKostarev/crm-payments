@@ -6,6 +6,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 export const api = ky.create({
   prefixUrl: API_URL,
   credentials: 'include', // для httpOnly cookie (refresh token)
+  timeout: 30000,
   hooks: {
     beforeRequest: [
       request => {
