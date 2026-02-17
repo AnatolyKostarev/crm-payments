@@ -1,5 +1,5 @@
 import ky from 'ky'
-import { useAuthStore } from '../stores/auth.store'
+import { useSessionStore } from '@/entities/session'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
@@ -9,7 +9,7 @@ export const api = ky.create({
   hooks: {
     beforeRequest: [
       request => {
-        const token = useAuthStore.getState().accessToken
+        const token = useSessionStore.getState().accessToken
         if (token) {
           request.headers.set('Authorization', `Bearer ${token}`)
         }
@@ -25,13 +25,13 @@ export const api = ky.create({
               .json<{ data: { accessToken: string } }>()
 
             const newToken = refreshRes.data.accessToken
-            useAuthStore.getState().setAccessToken(newToken)
+            useSessionStore.getState().setAccessToken(newToken)
 
             // Повторяем оригинальный запрос с новым токеном
             request.headers.set('Authorization', `Bearer ${newToken}`)
             return ky(request)
           } catch {
-            useAuthStore.getState().logout()
+            useSessionStore.getState().logout()
             window.location.href = '/login'
           }
         }

@@ -1,12 +1,12 @@
 import { Navigate } from 'react-router'
-import { useAuthStore } from '@/shared/stores/auth.store'
+import { useSessionStore } from '@/entities/session'
 
 interface GuestGuardProps {
   children: React.ReactNode
 }
 
 export function GuestGuard({ children }: GuestGuardProps) {
-  const isAuthenticated = useAuthStore(s => s.isAuthenticated)
+  const isAuthenticated = useSessionStore(s => s.isAuthenticated)
 
   if (isAuthenticated) {
     return (

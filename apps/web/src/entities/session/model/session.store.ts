@@ -1,20 +1,7 @@
 import { create } from 'zustand'
+import type { User, Tenant } from './types'
 
-interface User {
-  id: string
-  email: string
-  name: string
-  tenantId: string
-  isActive: boolean
-  telegramChatId: string | null
-}
-
-interface Tenant {
-  id: string
-  name: string
-}
-
-interface AuthState {
+interface SessionState {
   user: User | null
   tenant: Tenant | null
   permissions: string[]
@@ -32,7 +19,7 @@ interface AuthState {
   hasPermission: (permission: string) => boolean
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useSessionStore = create<SessionState>((set, get) => ({
   user: null,
   tenant: null,
   permissions: [],

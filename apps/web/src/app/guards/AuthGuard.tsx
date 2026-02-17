@@ -1,12 +1,12 @@
 import { Navigate, useLocation } from 'react-router'
-import { useAuthStore } from '@/shared/stores/auth.store'
+import { useSessionStore } from '@/entities/session'
 
 interface AuthGuardProps {
   children: React.ReactNode
 }
 
 export function AuthGuard({ children }: AuthGuardProps) {
-  const isAuthenticated = useAuthStore(s => s.isAuthenticated)
+  const isAuthenticated = useSessionStore(s => s.isAuthenticated)
   const location = useLocation()
 
   if (!isAuthenticated) {

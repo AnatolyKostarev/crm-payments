@@ -1,48 +1,13 @@
-import { useAuthStore } from '@/shared/stores/auth.store'
+import { useSessionStore } from '@/entities/session'
 import {
   Card,
   CardContent,
   CardHeader,
 } from '@/components/ui/card'
-import { FileText, CheckSquare, ClipboardList, Users } from 'lucide-react'
-
-const stats = [
-  {
-    label: 'Заявки',
-    value: '—',
-    description: 'Всего заявок на оплату',
-    icon: FileText,
-    iconBg: 'bg-blue-100 dark:bg-blue-900/40',
-    iconColor: 'text-blue-600 dark:text-blue-400',
-  },
-  {
-    label: 'На согласовании',
-    value: '—',
-    description: 'Ожидают решения',
-    icon: CheckSquare,
-    iconBg: 'bg-amber-100 dark:bg-amber-900/40',
-    iconColor: 'text-amber-600 dark:text-amber-400',
-  },
-  {
-    label: 'Реестры',
-    value: '—',
-    description: 'Сформировано реестров',
-    icon: ClipboardList,
-    iconBg: 'bg-green-100 dark:bg-green-900/40',
-    iconColor: 'text-green-600 dark:text-green-400',
-  },
-  {
-    label: 'Контрагенты',
-    value: '—',
-    description: 'Активных контрагентов',
-    icon: Users,
-    iconBg: 'bg-violet-100 dark:bg-violet-900/40',
-    iconColor: 'text-violet-600 dark:text-violet-400',
-  },
-]
+import { statsConfig } from './config/stats-config'
 
 export function DashboardPage() {
-  const user = useAuthStore(s => s.user)
+  const user = useSessionStore(s => s.user)
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -54,7 +19,7 @@ export function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map(({ label, value, description, icon: Icon, iconBg, iconColor }) => (
+        {statsConfig.map(({ label, value, description, icon: Icon, iconBg, iconColor }) => (
           <Card
             key={label}
             className="group transition-all duration-200 hover:shadow-md"
