@@ -7,6 +7,8 @@ interface SessionState {
   permissions: string[]
   accessToken: string | null
   isAuthenticated: boolean
+  /** true пока приложение проверяет сессию (refresh) при загрузке */
+  isRestoring: boolean
 
   setAuth: (data: {
     user: User
@@ -15,6 +17,7 @@ interface SessionState {
     accessToken: string
   }) => void
   setAccessToken: (token: string) => void
+  setRestoring: (value: boolean) => void
   logout: () => void
   hasPermission: (permission: string) => boolean
 }
@@ -25,6 +28,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   permissions: [],
   accessToken: null,
   isAuthenticated: false,
+  isRestoring: true,
 
   setAuth: ({ user, tenant, permissions, accessToken }) =>
     set({
@@ -36,6 +40,8 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     }),
 
   setAccessToken: token => set({ accessToken: token }),
+
+  setRestoring: value => set({ isRestoring: value }),
 
   logout: () =>
     set({

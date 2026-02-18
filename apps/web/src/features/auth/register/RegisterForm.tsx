@@ -49,7 +49,8 @@ export function RegisterForm() {
         toast.success('Компания зарегистрирована!')
         navigate('/')
       } catch (error) {
-        toast.error(getApiError(error, 'Ошибка регистрации. Возможно, email уже занят.'))
+        const errorMessage = await getApiError(error, 'Ошибка регистрации. Возможно, email уже занят.')
+        toast.error(errorMessage)
       } finally {
         setLoading(false)
       }

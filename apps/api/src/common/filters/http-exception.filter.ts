@@ -22,10 +22,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus()
       const response = exception.getResponse()
-      message =
-        typeof response === 'string'
-          ? response
-          : (response as any).message || message
+      if (typeof response === 'string') {
+        message = response
+      } else {
+        const responseObj = response as any
+        // Обработка ошибок валидации (массив сообщений)
+        if (Array.isArray(responseObj.message)) {
+          message = responseObj.message.join(', ')
+        } else {
+          message = responseObj.message || message
+        }
+      }
     }
 
     // Prisma errors

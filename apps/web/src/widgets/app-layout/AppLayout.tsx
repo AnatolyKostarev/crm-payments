@@ -9,8 +9,8 @@ export function AppLayout() {
       <AppSidebar />
       <SidebarInset>
         <Header />
-        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-7xl">
+        <main className="flex flex-1 flex-col overflow-hidden px-[10px] py-4">
+          <div className="flex flex-1 flex-col min-h-0 w-full">
             <Outlet />
           </div>
         </main>

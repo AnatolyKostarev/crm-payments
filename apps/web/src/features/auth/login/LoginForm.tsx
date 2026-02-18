@@ -43,7 +43,8 @@ export function LoginForm() {
         toast.success('Добро пожаловать!')
         navigate('/')
       } catch (error) {
-        toast.error(getApiError(error, 'Неверный email или пароль'))
+        const errorMessage = await getApiError(error, 'Неверный email или пароль')
+        toast.error(errorMessage)
       } finally {
         setLoading(false)
       }

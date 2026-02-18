@@ -21,12 +21,12 @@ export function ThemeToggle() {
           variant="ghost"
           size="icon"
           onClick={toggleTheme}
-          className="h-8 w-8 sm:h-9 sm:w-9"
+          className="size-8 shrink-0 sm:size-9"
         >
           {resolvedTheme === 'dark' ? (
-            <Sun className="h-4 w-4 sm:h-5 sm:w-5" />
+            <Sun className="size-4 sm:size-5" />
           ) : (
-            <Moon className="h-4 w-4 sm:h-5 sm:w-5" />
+            <Moon className="size-4 sm:size-5" />
           )}
           <span className="sr-only">Переключить тему</span>
         </Button>

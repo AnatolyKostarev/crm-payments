@@ -4,6 +4,7 @@ import { GuestGuard } from '@/app/guards/GuestGuard'
 import { LoginPage } from '@/pages/login/LoginPage'
 import { RegisterPage } from '@/pages/register/RegisterPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
+import { ContractorsPage } from '@/pages/contractors/ContractorsPage'
 import { NotFoundPage } from '@/pages/not-found/NotFoundPage'
 import { AppLayout } from '@/widgets/app-layout/AppLayout'
 
@@ -39,7 +40,7 @@ export function AppRouter() {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/payments" element={<div className="text-muted-foreground">Заявки — в разработке</div>} />
         <Route path="/approvals" element={<div className="text-muted-foreground">Согласование — в разработке</div>} />
-        <Route path="/contractors" element={<div className="text-muted-foreground">Контрагенты — в разработке</div>} />
+        <Route path="/contractors" element={<ContractorsPage />} />
         <Route path="/registries" element={<div className="text-muted-foreground">Реестры — в разработке</div>} />
         <Route path="/settings" element={<div className="text-muted-foreground">Настройки — в разработке</div>} />
         <Route path="*" element={<NotFoundPage fullScreen={false} />} />

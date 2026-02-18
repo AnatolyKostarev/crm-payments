@@ -16,37 +16,33 @@ export function Header() {
   const { tenant } = useSessionStore()
 
   return (
-    <header className="flex h-14 items-center justify-between border-b bg-background px-3 sm:px-4 md:px-6">
-      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-        <SidebarTrigger className="-ml-1" />
-        <Separator orientation="vertical" className="mr-2 h-4" />
-
-        <span className="text-xs sm:text-sm text-muted-foreground truncate">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-border/40 bg-background px-3 sm:px-4 md:px-6">
+      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+        <SidebarTrigger className="-ml-1 size-8 shrink-0 sm:size-9" />
+        <Separator orientation="vertical" className="mr-2 h-6 shrink-0" decorative />
+        <span className="truncate text-sm text-muted-foreground">
           {tenant?.name}
         </span>
       </div>
 
-      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-        {/* Theme toggle */}
+      <div className="flex shrink-0 items-center gap-1 sm:gap-2">
         <ThemeToggle />
-
         <Separator
           orientation="vertical"
-          className="h-5 sm:h-6 hidden sm:block"
+          className="h-6 shrink-0 hidden sm:block"
+          decorative
         />
-
-        {/* Notifications */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="relative h-8 w-8 sm:h-9 sm:w-9"
+              className="relative size-8 shrink-0 sm:size-9"
             >
-              <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
+              <Bell className="size-4 sm:size-5" />
               <Badge
                 variant="destructive"
-                className="absolute -right-0.5 -top-0.5 h-4 w-4 rounded-full p-0 text-[10px] flex items-center justify-center"
+                className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full p-0 text-[10px]"
               >
                 0
               </Badge>
@@ -54,13 +50,11 @@ export function Header() {
           </TooltipTrigger>
           <TooltipContent>Уведомления</TooltipContent>
         </Tooltip>
-
         <Separator
           orientation="vertical"
-          className="h-5 sm:h-6 hidden sm:block"
+          className="h-6 shrink-0 hidden sm:block"
+          decorative
         />
-
-        {/* User menu */}
         <UserMenu />
       </div>
     </header>
