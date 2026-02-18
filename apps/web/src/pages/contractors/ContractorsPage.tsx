@@ -7,13 +7,17 @@ import {
   useDeleteContractor,
 } from '@/entities/contractor/hooks'
 import { DataTable } from '@/shared/ui/DataTable'
+import { TablePagination } from '@/shared/ui/table-pagination'
 import { ContractorDialog } from '@/features/manage-contractor/ContractorDialog'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog'
 import { SearchInput } from '@/shared/ui/search-input'
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
+import { useIsLg } from '@/shared/hooks/use-mobile'
+import { Loader2 } from 'lucide-react'
 import type { Contractor } from '@/entities/contractor/types'
 import { getContractorsColumns } from './config/contractors-columns'
+import { ContractorCard } from './ui/ContractorCard'
 
 const SEARCH_DEBOUNCE_MS = 300
 const EMPTY_ITEMS: Contractor[] = []
@@ -92,6 +96,7 @@ export function ContractorsPage() {
     [items, columns]
   )
   const table = useReactTable(tableOptions)
+  const isLg = useIsLg()
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col gap-4">
@@ -115,16 +120,54 @@ export function ContractorsPage() {
         </Button>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <DataTable
-          table={table}
-          columns={columns}
-          isLoading={isLoading}
-          pagination={pagination}
-          onPaginationChange={setOffset}
-          emptyMessage="Контрагенты не найдены"
-        />
-      </div>
+      {/* До 1024px — только карточки (таблица не рендерится, нет дублирования и переполнения) */}
+      {!isLg && (
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {isLoading ? (
+            <div className="flex flex-1 items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : items.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              Контрагенты не найдены
+            </p>
+          ) : (
+            <div className="min-h-0 flex-1 overflow-auto">
+              <div className="space-y-3 pb-4">
+                {items.map(contractor => (
+                  <ContractorCard
+                    key={contractor.id}
+                    contractor={contractor}
+                    onEdit={handleEdit}
+                    onDeleteRequest={onDeleteRequest}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          {pagination && (
+            <TablePagination
+              pagination={pagination}
+              onPaginationChange={setOffset}
+              centered
+            />
+          )}
+        </div>
+      )}
+
+      {/* От 1024px — только таблица */}
+      {isLg && (
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <DataTable
+            table={table}
+            columns={columns}
+            isLoading={isLoading}
+            pagination={pagination}
+            onPaginationChange={setOffset}
+            emptyMessage="Контрагенты не найдены"
+          />
+        </div>
+      )}
 
       {/* Create/Edit Dialog */}
       <ContractorDialog
