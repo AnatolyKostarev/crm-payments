@@ -1,9 +1,6 @@
 import { useState, useMemo, useCallback, useRef } from 'react'
-import {
-  useReactTable,
-  getCoreRowModel,
-} from '@tanstack/react-table'
-import { Plus, Search } from 'lucide-react'
+import { useReactTable, getCoreRowModel } from '@tanstack/react-table'
+import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   useContractors,
@@ -12,8 +9,8 @@ import {
 import { DataTable } from '@/shared/ui/DataTable'
 import { ContractorDialog } from '@/features/manage-contractor/ContractorDialog'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog'
+import { SearchInput } from '@/shared/ui/search-input'
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 import type { Contractor } from '@/entities/contractor/types'
 import { getContractorsColumns } from './config/contractors-columns'
@@ -98,22 +95,21 @@ export function ContractorsPage() {
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col gap-4">
-      <h1 className="shrink-0 text-2xl font-bold tracking-tight">
+      <h2 className="shrink-0 text-2xl font-bold tracking-tight">
         Контрагенты
-      </h1>
+      </h2>
 
       {/* Search and Add */}
       <div className="flex shrink-0 items-center gap-3">
-        <div className="relative max-w-sm flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Поиск по названию или ИНН..."
-            value={search}
-            onChange={handleSearchChange}
-            className="h-10 pl-9"
-          />
-        </div>
-        <Button onClick={handleCreate} className="h-10">
+        <SearchInput
+          placeholder="Поиск по названию или ИНН..."
+          value={search}
+          onChange={handleSearchChange}
+        />
+        <Button
+          onClick={handleCreate}
+          className="h-10"
+        >
           <Plus className="mr-2 h-4 w-4" />
           Добавить
         </Button>
