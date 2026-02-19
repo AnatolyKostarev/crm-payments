@@ -17,6 +17,15 @@ const DashboardPage = lazy(() =>
 const ContractorsPage = lazy(() =>
   import('@/pages/contractors/ContractorsPage').then(m => ({ default: m.ContractorsPage }))
 )
+const PaymentsListPage = lazy(() =>
+  import('@/pages/payments/PaymentsListPage').then(m => ({ default: m.PaymentsListPage }))
+)
+const PaymentCreatePage = lazy(() =>
+  import('@/pages/payments/PaymentCreatePage').then(m => ({ default: m.PaymentCreatePage }))
+)
+const PaymentDetailPage = lazy(() =>
+  import('@/pages/payments/PaymentDetailPage').then(m => ({ default: m.PaymentDetailPage }))
+)
 const NotFoundPage = lazy(() =>
   import('@/pages/not-found/NotFoundPage').then(m => ({ default: m.NotFoundPage }))
 )
@@ -52,7 +61,9 @@ export function AppRouter() {
           }
         >
           <Route path="/" element={<DashboardPage />} />
-          <Route path="/payments" element={<div className="text-muted-foreground">Заявки — в разработке</div>} />
+          <Route path="/payments" element={<PaymentsListPage />} />
+          <Route path="/payments/create" element={<PaymentCreatePage />} />
+          <Route path="/payments/:id" element={<PaymentDetailPage />} />
           <Route path="/approvals" element={<div className="text-muted-foreground">Согласование — в разработке</div>} />
           <Route path="/contractors" element={<ContractorsPage />} />
           <Route path="/registries" element={<div className="text-muted-foreground">Реестры — в разработке</div>} />

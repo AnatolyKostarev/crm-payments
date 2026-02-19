@@ -1,6 +1,6 @@
 import { Pencil, Trash2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { ActionsMenu, type ActionItem } from '@/shared/ui/ActionsMenu'
 import type { Contractor } from '@/entities/contractor/types'
 
 interface ContractorCardProps {
@@ -18,26 +18,22 @@ export function ContractorCard({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <span className="font-semibold leading-tight">{contractor.name}</span>
-        <div className="flex gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => onEdit(contractor)}
-            aria-label="Редактировать"
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-destructive hover:text-destructive"
-            onClick={() => onDeleteRequest(contractor.id)}
-            aria-label="Удалить"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
+        <ActionsMenu
+          actions={[
+            {
+              label: 'Изменить',
+              icon: <Pencil className="h-4 w-4" />,
+              onClick: () => onEdit(contractor),
+            },
+            {
+              label: 'Удалить',
+              icon: <Trash2 className="h-4 w-4" />,
+              onClick: () => onDeleteRequest(contractor.id),
+              variant: 'destructive',
+              separator: true,
+            },
+          ]}
+        />
       </CardHeader>
       <CardContent className="space-y-1.5 text-sm">
         <div className="flex justify-between gap-2">

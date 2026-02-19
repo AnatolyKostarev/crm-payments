@@ -64,6 +64,17 @@ export class PaymentsService {
   ) {
     const { status, contractorId, dateFrom, dateTo, limit = 21, offset = 0 } = query
 
+    // Валидация диапазона дат
+    if (dateFrom && dateTo) {
+      const fromDate = new Date(dateFrom)
+      const toDate = new Date(dateTo)
+      if (toDate < fromDate) {
+        throw new BadRequestException(
+          'Дата окончания не может быть ранее даты начала',
+        )
+      }
+    }
+
     const where: any = { tenantId }
 
     // VIEW_ALL видит все заявки, VIEW_OWN — только свои
