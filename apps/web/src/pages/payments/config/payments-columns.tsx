@@ -6,20 +6,24 @@ import { ActionsMenu, type ActionItem } from '@/shared/ui/ActionsMenu'
 
 export interface PaymentsColumnsParams {
   formatAmount: (amount: string, currency: string) => string
+  contractorHeader?: ColumnDef<Payment>['header']
   onView: (id: string) => void
   onEdit: (id: string) => void
   onSubmit: (id: string) => void
   onDeleteRequest: (id: string) => void
   isSubmitting: boolean
+  createdAtHeader?: ColumnDef<Payment>['header']
 }
 
 export function getPaymentsColumns({
   formatAmount,
+  contractorHeader,
   onView,
   onEdit,
   onSubmit,
   onDeleteRequest,
   isSubmitting,
+  createdAtHeader,
 }: PaymentsColumnsParams): ColumnDef<Payment>[] {
   return [
     {
@@ -32,14 +36,18 @@ export function getPaymentsColumns({
       ),
     },
     {
+      accessorKey: 'contractor',
+      header: contractorHeader ?? 'Контрагент',
+      cell: ({ row }) => (
+        <span className="text-sm">{row.original.contractor.name}</span>
+      ),
+    },
+    {
       accessorKey: 'purpose',
-      header: 'Назначение',
+      header: 'Назначение платежа',
       cell: ({ row }) => (
         <div className="max-w-[300px]">
           <p className="truncate font-medium">{row.original.purpose}</p>
-          <p className="text-xs text-muted-foreground">
-            {row.original.contractor.name}
-          </p>
         </div>
       ),
     },
@@ -66,7 +74,7 @@ export function getPaymentsColumns({
     },
     {
       accessorKey: 'createdAt',
-      header: 'Дата',
+      header: createdAtHeader ?? 'Дата',
       cell: ({ row }) =>
         new Date(row.original.createdAt).toLocaleDateString('ru-RU'),
     },
@@ -109,7 +117,7 @@ export function getPaymentsColumns({
                   label: 'Удалить',
                   icon: <Trash2 className="h-4 w-4" />,
                   onClick: () => onDeleteRequest(p.id),
-                  variant: 'destructive',
+                  variant: 'destructive' as const,
                   separator: true,
                 },
               ]

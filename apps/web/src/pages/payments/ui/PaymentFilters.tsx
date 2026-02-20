@@ -1,6 +1,4 @@
-import { useMemo } from 'react'
 import { X } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -9,7 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { DatePicker } from '@/shared/ui/DatePicker'
 import type { PaymentQuery, PaymentStatus } from '../../../entities/payment/types'
 
 const statusOptions: { value: PaymentStatus; label: string }[] = [
@@ -28,56 +25,21 @@ interface PaymentFiltersProps {
 }
 
 export function PaymentFilters({ filters, onChange }: PaymentFiltersProps) {
-  const hasFilters = filters.status || filters.dateFrom || filters.dateTo
-
-  const dateToError = useMemo(() => {
-    if (filters.dateFrom && filters.dateTo) {
-      const fromDate = new Date(filters.dateFrom)
-      const toDate = new Date(filters.dateTo)
-
-      if (toDate < fromDate) {
-        return 'Дата окончания не может быть ранее даты начала'
-      }
-    }
-    return null
-  }, [filters.dateFrom, filters.dateTo])
-
-  const handleDateFromChange = (value: string) => {
-    const newDateFrom = value || undefined
-    const newDateTo = filters.dateTo
-
-    if (newDateFrom && newDateTo) {
-      const fromDate = new Date(newDateFrom)
-      const toDate = new Date(newDateTo)
-
-      if (toDate < fromDate) {
-        toast.error('Дата окончания не может быть ранее даты начала')
-        return
-      }
-    }
-
-    onChange({ ...filters, dateFrom: newDateFrom })
-  }
-
-  const handleDateToChange = (value: string) => {
-    const newDateTo = value || undefined
-    const newDateFrom = filters.dateFrom
-
-    if (newDateFrom && newDateTo) {
-      const fromDate = new Date(newDateFrom)
-      const toDate = new Date(newDateTo)
-
-      if (toDate < fromDate) {
-        toast.error('Дата окончания не может быть ранее даты начала')
-        return
-      }
-    }
-
-    onChange({ ...filters, dateTo: newDateTo })
-  }
+  const hasFilters =
+    !!filters.status ||
+    !!filters.dateFrom ||
+    !!filters.dateTo ||
+    !!filters.contractorIds?.length
 
   const handleClear = () => {
-    onChange({ limit: filters.limit, offset: 0 })
+    onChange({
+      ...filters,
+      status: undefined,
+      contractorId: undefined,
+      contractorIds: undefined,
+      dateFrom: undefined,
+      dateTo: undefined,
+    })
   }
 
   return (
@@ -106,26 +68,6 @@ export function PaymentFilters({ filters, onChange }: PaymentFiltersProps) {
           ))}
         </SelectContent>
       </Select>
-
-      <div className="flex flex-col gap-1">
-        <DatePicker
-          value={filters.dateFrom}
-          onChange={handleDateFromChange}
-          placeholder="Дата от"
-          className="h-10 w-[160px]"
-        />
-      </div>
-      <div className="flex flex-col gap-1">
-        <DatePicker
-          value={filters.dateTo}
-          onChange={handleDateToChange}
-          placeholder="Дата до"
-          className="h-10 w-[160px]"
-        />
-        {dateToError && (
-          <span className="text-xs text-destructive">{dateToError}</span>
-        )}
-      </div>
 
       {hasFilters && (
         <Button

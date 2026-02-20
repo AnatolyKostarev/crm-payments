@@ -81,6 +81,7 @@ export type UpdatePaymentRequest = Partial<CreatePaymentRequest>
 export interface PaymentQuery extends PaginationParams {
   status?: PaymentStatus
   contractorId?: string
+  contractorIds?: string[]
   dateFrom?: string
   dateTo?: string
 }

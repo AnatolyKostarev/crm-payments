@@ -13,10 +13,18 @@ export const contractorKeys = {
   detail: (id: string) => [...contractorKeys.all, 'detail', id] as const,
 }
 
-export function useContractors(params?: ContractorQuery) {
+interface UseContractorsOptions {
+  enabled?: boolean
+}
+
+export function useContractors(
+  params?: ContractorQuery,
+  options?: UseContractorsOptions
+) {
   return useQuery({
     queryKey: contractorKeys.list(params),
     queryFn: () => contractorsApi.getAll(params),
+    enabled: options?.enabled ?? true,
   })
 }
 

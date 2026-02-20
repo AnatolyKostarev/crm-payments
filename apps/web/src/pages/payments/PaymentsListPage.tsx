@@ -10,6 +10,8 @@ import {
 } from '@/entities/payment/hooks'
 import { DataTable } from '@/shared/ui/DataTable'
 import { PaymentFilters } from './ui/PaymentFilters'
+import { PaymentDateFilterDialog } from './ui/PaymentDateFilterDialog'
+import { PaymentContractorFilterDialog } from './ui/PaymentContractorFilterDialog'
 import { PaymentEditDialog } from '@/features/manage-payment/PaymentEditDialog'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog'
@@ -61,17 +63,66 @@ export function PaymentsListPage() {
     }).format(Number(amount))
   }, [])
 
+  const handleDateApply = useCallback((dateFrom?: string, dateTo?: string) => {
+    setFilters(prev => ({
+      ...prev,
+      dateFrom,
+      dateTo,
+      offset: 0,
+    }))
+  }, [])
+
+  const handleContractorApply = useCallback((contractorIds?: string[]) => {
+    setFilters(prev => ({
+      ...prev,
+      contractorIds,
+      contractorId: undefined,
+      offset: 0,
+    }))
+  }, [])
+
   const columns = useMemo(
     () =>
       getPaymentsColumns({
         formatAmount,
+        contractorHeader: () => (
+          <div className="flex items-center gap-1">
+            <span>Контрагент</span>
+            <PaymentContractorFilterDialog
+              contractorIds={filters.contractorIds}
+              onApply={handleContractorApply}
+            />
+          </div>
+        ),
+        createdAtHeader: (
+          () => (
+            <div className="flex items-center gap-1">
+              <span>Дата</span>
+              <PaymentDateFilterDialog
+                dateFrom={filters.dateFrom}
+                dateTo={filters.dateTo}
+                onApply={handleDateApply}
+              />
+            </div>
+          )
+        ),
         onView: id => navigate(`/payments/${id}`),
         onEdit: setEditingPaymentId,
         onSubmit: handleSubmit,
         onDeleteRequest: setDeletingId,
         isSubmitting: submitMutation.isPending,
       }),
-    [formatAmount, handleSubmit, navigate, submitMutation.isPending]
+    [
+      filters.dateFrom,
+      filters.dateTo,
+      filters.contractorIds,
+      formatAmount,
+      handleContractorApply,
+      handleDateApply,
+      handleSubmit,
+      navigate,
+      submitMutation.isPending,
+    ]
   )
 
   const table = useReactTable({

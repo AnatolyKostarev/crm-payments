@@ -62,12 +62,23 @@ export class PaymentsService {
     tenantId: string,
     permissions: string[],
   ) {
-    const { status, contractorId, dateFrom, dateTo, limit = 21, offset = 0 } = query
+    const {
+      status,
+      contractorId,
+      contractorIds,
+      dateFrom,
+      dateTo,
+      limit = 21,
+      offset = 0,
+    } = query
+
+    const parseStartOfDayUtc = (date: string) => new Date(`${date}T00:00:00.000Z`)
+    const parseEndOfDayUtc = (date: string) => new Date(`${date}T23:59:59.999Z`)
 
     // Валидация диапазона дат
     if (dateFrom && dateTo) {
-      const fromDate = new Date(dateFrom)
-      const toDate = new Date(dateTo)
+      const fromDate = parseStartOfDayUtc(dateFrom)
+      const toDate = parseEndOfDayUtc(dateTo)
       if (toDate < fromDate) {
         throw new BadRequestException(
           'Дата окончания не может быть ранее даты начала',
@@ -83,11 +94,21 @@ export class PaymentsService {
     }
 
     if (status) where.status = status
-    if (contractorId) where.contractorId = contractorId
+
+    const contractorIdsList = contractorIds
+      ?.split(',')
+      .map((id) => id.trim())
+      .filter(Boolean)
+
+    if (contractorIdsList && contractorIdsList.length > 0) {
+      where.contractorId = { in: contractorIdsList }
+    } else if (contractorId) {
+      where.contractorId = contractorId
+    }
     if (dateFrom || dateTo) {
       where.createdAt = {}
-      if (dateFrom) where.createdAt.gte = new Date(dateFrom)
-      if (dateTo) where.createdAt.lte = new Date(dateTo)
+      if (dateFrom) where.createdAt.gte = parseStartOfDayUtc(dateFrom)
+      if (dateTo) where.createdAt.lte = parseEndOfDayUtc(dateTo)
     }
 
     const [items, total] = await Promise.all([

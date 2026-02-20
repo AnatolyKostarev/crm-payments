@@ -54,6 +54,14 @@ export class QueryPaymentDto extends PaginationDto {
   @IsString()
   contractorId?: string
 
+  @ApiPropertyOptional({
+    description: 'Фильтр по нескольким ID контрагентов (через запятую)',
+    example: 'id1,id2,id3',
+  })
+  @IsOptional()
+  @IsString()
+  contractorIds?: string
+
   @ApiPropertyOptional({ description: 'Дата от (ISO 8601)', example: '2025-01-01' })
   @IsOptional()
   @IsDateString()
