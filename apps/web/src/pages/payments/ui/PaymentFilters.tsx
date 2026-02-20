@@ -7,17 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { paymentStatusOptions } from '@/entities/payment/lib/status-meta'
 import type { PaymentQuery, PaymentStatus } from '../../../entities/payment/types'
-
-const statusOptions: { value: PaymentStatus; label: string }[] = [
-  { value: 'DRAFT', label: 'Черновик' },
-  { value: 'PENDING_APPROVAL', label: 'На согласовании' },
-  { value: 'APPROVED', label: 'Одобрена' },
-  { value: 'REJECTED', label: 'Отклонена' },
-  { value: 'REVISION', label: 'На доработке' },
-  { value: 'IN_REGISTRY', label: 'В реестре' },
-  { value: 'PAID', label: 'Оплачена' },
-]
 
 interface PaymentFiltersProps {
   filters: PaymentQuery
@@ -58,7 +49,7 @@ export function PaymentFilters({ filters, onChange }: PaymentFiltersProps) {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="ALL">Все статусы</SelectItem>
-          {statusOptions.map(s => (
+          {paymentStatusOptions.map(s => (
             <SelectItem
               key={s.value}
               value={s.value}
