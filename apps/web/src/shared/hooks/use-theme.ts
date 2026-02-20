@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 type Theme = 'light' | 'dark' | 'system'
 
@@ -9,45 +9,31 @@ export function useTheme() {
     return stored || 'system'
   })
 
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => {
+  const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window === 'undefined') return 'light'
-    const stored = localStorage.getItem('theme')
-    if (stored === 'dark') return 'dark'
-    if (stored === 'light') return 'light'
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   })
+
+  const resolvedTheme = useMemo<'light' | 'dark'>(() => {
+    if (theme === 'system') return systemTheme
+    return theme
+  }, [theme, systemTheme])
 
   useEffect(() => {
     const root = window.document.documentElement
     root.classList.remove('light', 'dark')
-
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-      root.classList.add(systemTheme)
-      setResolvedTheme(systemTheme)
-    } else {
-      root.classList.add(theme)
-      setResolvedTheme(theme)
-    }
-  }, [theme])
+    root.classList.add(resolvedTheme)
+  }, [resolvedTheme])
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const handleChange = () => {
-      if (theme === 'system') {
-        const systemTheme = mediaQuery.matches ? 'dark' : 'light'
-        const root = window.document.documentElement
-        root.classList.remove('light', 'dark')
-        root.classList.add(systemTheme)
-        setResolvedTheme(systemTheme)
-      }
+      setSystemTheme(mediaQuery.matches ? 'dark' : 'light')
     }
 
     mediaQuery.addEventListener('change', handleChange)
     return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [theme])
+  }, [])
 
   const setThemeValue = (newTheme: Theme) => {
     setTheme(newTheme)

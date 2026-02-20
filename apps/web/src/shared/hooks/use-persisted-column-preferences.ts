@@ -89,29 +89,59 @@ export function usePersistedColumnPreferences({
     () => parsePersistedPreferences(storageKey, columnIds).columnVisibility
   )
 
-  useEffect(() => {
-    setColumnOrder(prev => normalizeOrder(prev, columnIds))
-    setColumnVisibility(prev => normalizeVisibility(prev, columnIds))
-  }, [columnIds])
+  const normalizedColumnOrder = useMemo(
+    () => normalizeOrder(columnOrder, columnIds),
+    [columnOrder, columnIds]
+  )
+  const normalizedColumnVisibility = useMemo(
+    () => normalizeVisibility(columnVisibility, columnIds),
+    [columnVisibility, columnIds]
+  )
+
+  const handleColumnOrderChange = (updater: ColumnOrderState | ((prev: ColumnOrderState) => ColumnOrderState)) => {
+    setColumnOrder(prev => {
+      const base = normalizeOrder(prev, columnIds)
+      const nextValue =
+        typeof updater === 'function' ? updater(base) : updater
+      return normalizeOrder(nextValue, columnIds)
+    })
+  }
+
+  const handleColumnVisibilityChange = (
+    updater:
+      | VisibilityState
+      | ((prev: VisibilityState) => VisibilityState)
+  ) => {
+    setColumnVisibility(prev => {
+      const base = normalizeVisibility(prev, columnIds)
+      const nextValue =
+        typeof updater === 'function' ? updater(base) : updater
+      return normalizeVisibility(nextValue, columnIds)
+    })
+  }
 
   useEffect(() => {
     const payload = {
-      columnOrder: normalizeOrder(columnOrder, columnIds),
-      columnVisibility: normalizeVisibility(columnVisibility, columnIds),
+      columnOrder: normalizedColumnOrder,
+      columnVisibility: normalizedColumnVisibility,
     }
     localStorage.setItem(storageKey, JSON.stringify(payload))
-  }, [columnOrder, columnIds, columnVisibility, storageKey])
+  }, [
+    normalizedColumnOrder,
+    normalizedColumnVisibility,
+    storageKey,
+  ])
 
   const resetPreferences = () => {
-    setColumnOrder(defaultColumnOrder)
-    setColumnVisibility(defaultColumnVisibility)
+    handleColumnOrderChange(defaultColumnOrder)
+    handleColumnVisibilityChange(defaultColumnVisibility)
   }
 
   return {
-    columnOrder,
-    setColumnOrder,
-    columnVisibility,
-    setColumnVisibility,
+    columnOrder: normalizedColumnOrder,
+    setColumnOrder: handleColumnOrderChange,
+    columnVisibility: normalizedColumnVisibility,
+    setColumnVisibility: handleColumnVisibilityChange,
     defaultColumnOrder,
     defaultColumnVisibility,
     resetPreferences,
