@@ -27,6 +27,9 @@ const PaymentCreatePage = lazy(() =>
 const PaymentDetailPage = lazy(() =>
   import('@/pages/payments/PaymentDetailPage').then(m => ({ default: m.PaymentDetailPage }))
 )
+const SettingsPage = lazy(() =>
+  import('@/pages/settings/SettingsPage').then(m => ({ default: m.SettingsPage }))
+)
 const NotFoundPage = lazy(() =>
   import('@/pages/not-found/NotFoundPage').then(m => ({ default: m.NotFoundPage }))
 )
@@ -81,7 +84,7 @@ export function AppRouter() {
           <Route path="/approvals" element={<div className="text-muted-foreground">Согласование — в разработке</div>} />
           <Route path="/contractors" element={<ContractorsPage />} />
           <Route path="/registries" element={<div className="text-muted-foreground">Реестры — в разработке</div>} />
-          <Route path="/settings" element={<div className="text-muted-foreground">Настройки — в разработке</div>} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFoundPage fullScreen={false} />} />
         </Route>
 

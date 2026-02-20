@@ -9,7 +9,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { SidebarTrigger } from '@/components/ui/sidebar'
-import { ThemeToggle } from '@/app/providers/theme-toggle'
+import { ThemeSelectorDropdown } from '@/features/theme-selector'
 import { UserMenu } from '@/widgets/header/UserMenu'
 
 export function Header() {
@@ -26,7 +26,7 @@ export function Header() {
       </div>
 
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-        <ThemeToggle />
+        <ThemeSelectorDropdown />
         <Separator
           orientation="vertical"
           className="h-6 shrink-0 hidden sm:block"
