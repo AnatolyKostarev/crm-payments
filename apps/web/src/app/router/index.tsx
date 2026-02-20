@@ -1,5 +1,5 @@
-import { lazy, Suspense } from 'react'
-import { Routes, Route } from 'react-router'
+import { lazy, Suspense, useEffect } from 'react'
+import { Routes, Route, useLocation } from 'react-router'
 import { AuthGuard } from '@/app/guards/AuthGuard'
 import { GuestGuard } from '@/app/guards/GuestGuard'
 import { AppLayout } from '@/widgets/app-layout/AppLayout'
@@ -30,9 +30,37 @@ const NotFoundPage = lazy(() =>
   import('@/pages/not-found/NotFoundPage').then(m => ({ default: m.NotFoundPage }))
 )
 
+const APP_NAME = 'CRM Payments'
+
+function getPageTitle(pathname: string): string {
+  if (pathname === '/') return 'Дашборд'
+  if (pathname === '/login') return 'Вход'
+  if (pathname === '/register') return 'Регистрация'
+  if (pathname === '/payments') return 'Заявки'
+  if (pathname === '/payments/create') return 'Создание заявки'
+  if (/^\/payments\/[^/]+$/.test(pathname)) return 'Детали заявки'
+  if (pathname.startsWith('/approvals')) return 'Согласование'
+  if (pathname.startsWith('/contractors')) return 'Контрагенты'
+  if (pathname.startsWith('/registries')) return 'Реестры'
+  if (pathname.startsWith('/settings')) return 'Настройки'
+
+  return 'Страница не найдена'
+}
+
+function DocumentTitleManager() {
+  const location = useLocation()
+
+  useEffect(() => {
+    document.title = `${getPageTitle(location.pathname)} | ${APP_NAME}`
+  }, [location.pathname])
+
+  return null
+}
+
 export function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
+      <DocumentTitleManager />
       <Routes>
         {/* Public */}
         <Route
