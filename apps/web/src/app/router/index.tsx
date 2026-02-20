@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router'
 import { AuthGuard } from '@/app/guards/AuthGuard'
 import { GuestGuard } from '@/app/guards/GuestGuard'
+import { getPageTitle } from '@/app/config/navigation'
 import { AppLayout } from '@/widgets/app-layout/AppLayout'
 import { PageLoader } from '@/shared/ui/page-loader'
 
@@ -31,21 +32,6 @@ const NotFoundPage = lazy(() =>
 )
 
 const APP_NAME = 'CRM Payments'
-
-function getPageTitle(pathname: string): string {
-  if (pathname === '/') return 'Дашборд'
-  if (pathname === '/login') return 'Вход'
-  if (pathname === '/register') return 'Регистрация'
-  if (pathname === '/payments') return 'Заявки'
-  if (pathname === '/payments/create') return 'Создание заявки'
-  if (/^\/payments\/[^/]+$/.test(pathname)) return 'Детали заявки'
-  if (pathname.startsWith('/approvals')) return 'Согласование'
-  if (pathname.startsWith('/contractors')) return 'Контрагенты'
-  if (pathname.startsWith('/registries')) return 'Реестры'
-  if (pathname.startsWith('/settings')) return 'Настройки'
-
-  return 'Страница не найдена'
-}
 
 function DocumentTitleManager() {
   const location = useLocation()

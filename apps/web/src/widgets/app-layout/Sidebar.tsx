@@ -1,13 +1,5 @@
 import { NavLink, useLocation } from 'react-router'
 import {
-  LayoutDashboard,
-  FileText,
-  Users,
-  CheckSquare,
-  ClipboardList,
-  Settings,
-} from 'lucide-react'
-import {
   Sidebar as ShadcnSidebar,
   SidebarContent,
   SidebarFooter,
@@ -18,17 +10,13 @@ import {
   SidebarSeparator,
   SidebarGroup,
   SidebarGroupContent,
+  useSidebar,
 } from '@/components/ui/sidebar'
-
-const navItems = [
-  { to: '/', label: 'Дашборд', icon: LayoutDashboard },
-  { to: '/payments', label: 'Заявки', icon: FileText },
-  { to: '/approvals', label: 'Согласование', icon: CheckSquare },
-  { to: '/contractors', label: 'Контрагенты', icon: Users },
-  { to: '/registries', label: 'Реестры', icon: ClipboardList },
-]
-
-const bottomItems = [{ to: '/settings', label: 'Настройки', icon: Settings }]
+import {
+  bottomNavItems,
+  isNavItemActive,
+  mainNavItems,
+} from '@/app/config/navigation'
 
 interface AppSidebarProps {
   onNavigate?: () => void
@@ -36,6 +24,14 @@ interface AppSidebarProps {
 
 export function AppSidebar({ onNavigate }: AppSidebarProps) {
   const location = useLocation()
+  const { isMobile, setOpenMobile } = useSidebar()
+
+  const handleNavigate = () => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+    onNavigate?.()
+  }
 
   return (
     <ShadcnSidebar collapsible="icon">
@@ -43,7 +39,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <NavLink to="/" onClick={onNavigate}>
+              <NavLink to="/" onClick={handleNavigate}>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <span className="text-sm font-bold">CP</span>
                 </div>
@@ -60,10 +56,9 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map(({ to, label, icon: Icon }) => {
-                const isActive = to === '/'
-                  ? location.pathname === '/'
-                  : location.pathname.startsWith(to)
+              {mainNavItems.map(item => {
+                const { to, label, icon: Icon } = item
+                const isActive = isNavItemActive(item, location.pathname)
 
                 return (
                   <SidebarMenuItem key={to}>
@@ -72,7 +67,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
                       isActive={isActive}
                       tooltip={label}
                     >
-                      <NavLink to={to} onClick={onNavigate}>
+                      <NavLink to={to} onClick={handleNavigate}>
                         <Icon />
                         <span>{label}</span>
                       </NavLink>
@@ -89,8 +84,9 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
 
       <SidebarFooter>
         <SidebarMenu>
-          {bottomItems.map(({ to, label, icon: Icon }) => {
-            const isActive = location.pathname.startsWith(to)
+          {bottomNavItems.map(item => {
+            const { to, label, icon: Icon } = item
+            const isActive = isNavItemActive(item, location.pathname)
 
             return (
               <SidebarMenuItem key={to}>
@@ -99,7 +95,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
                   isActive={isActive}
                   tooltip={label}
                 >
-                  <NavLink to={to} onClick={onNavigate}>
+                  <NavLink to={to} onClick={handleNavigate}>
                     <Icon />
                     <span>{label}</span>
                   </NavLink>

@@ -13,12 +13,16 @@ import {
   useSubmitPayment,
 } from '@/entities/payment/hooks'
 import { DataTable } from '@/shared/ui/DataTable'
+import { TablePagination } from '@/shared/ui/table-pagination'
 import { usePersistedColumnSizing } from '@/shared/hooks/use-persisted-column-sizing'
 import { usePersistedColumnPreferences } from '@/shared/hooks/use-persisted-column-preferences'
+import { useIsLg } from '@/shared/hooks/use-mobile'
 import { ColumnSettingsDialog } from '@/shared/ui/ColumnSettingsDialog'
+import { PageLoadingState, PageNotFoundState } from '@/shared/ui/page-state'
 import { PaymentFilters } from './ui/PaymentFilters'
 import { PaymentDateFilterDialog } from './ui/PaymentDateFilterDialog'
 import { PaymentContractorFilterDialog } from './ui/PaymentContractorFilterDialog'
+import { PaymentCard } from './ui/PaymentCard'
 import { PaymentEditDialog } from '@/features/manage-payment/PaymentEditDialog'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog'
@@ -34,6 +38,7 @@ import {
 
 export function PaymentsListPage() {
   const navigate = useNavigate()
+  const isLg = useIsLg()
   const [filters, setFilters] = useState<PaymentQuery>({ offset: 0, limit: 20 })
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null)
@@ -192,14 +197,16 @@ export function PaymentsListPage() {
           onChange={f => setFilters({ ...f, offset: 0 })}
         />
         <div className="flex items-center gap-2">
-          <ColumnSettingsDialog
-            items={[...PAYMENTS_CONFIGURABLE_COLUMNS]}
-            columnOrder={columnOrder}
-            columnVisibility={columnVisibility}
-            defaultColumnOrder={defaultColumnOrder}
-            defaultColumnVisibility={defaultColumnVisibility}
-            onApply={handleColumnSettingsApply}
-          />
+          {isLg && (
+            <ColumnSettingsDialog
+              items={[...PAYMENTS_CONFIGURABLE_COLUMNS]}
+              columnOrder={columnOrder}
+              columnVisibility={columnVisibility}
+              defaultColumnOrder={defaultColumnOrder}
+              defaultColumnVisibility={defaultColumnVisibility}
+              onApply={handleColumnSettingsApply}
+            />
+          )}
           <Button
             className="h-10"
             onClick={() => navigate('/payments/create')}
@@ -210,16 +217,55 @@ export function PaymentsListPage() {
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <DataTable
-          table={table}
-          columns={columns}
-          isLoading={isLoading}
-          pagination={pagination}
-          onPaginationChange={o => setFilters(prev => ({ ...prev, offset: o }))}
-          emptyMessage="Заявки не найдены"
-        />
-      </div>
+      {!isLg && (
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {isLoading ? (
+            <PageLoadingState className="flex flex-1 items-center justify-center py-8" />
+          ) : items.length === 0 ? (
+            <PageNotFoundState
+              message="Заявки не найдены"
+              className="py-8"
+            />
+          ) : (
+            <div className="min-h-0 flex-1 overflow-auto">
+              <div className="space-y-3 pb-4">
+                {items.map(payment => (
+                  <PaymentCard
+                    key={payment.id}
+                    payment={payment}
+                    formatAmount={formatAmount}
+                    onView={id => navigate(`/payments/${id}`)}
+                    onEdit={setEditingPaymentId}
+                    onSubmit={handleSubmit}
+                    onDeleteRequest={setDeletingId}
+                    isSubmitting={submitMutation.isPending}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          {pagination && (
+            <TablePagination
+              pagination={pagination}
+              onPaginationChange={o => setFilters(prev => ({ ...prev, offset: o }))}
+              centered
+            />
+          )}
+        </div>
+      )}
+
+      {isLg && (
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <DataTable
+            table={table}
+            columns={columns}
+            isLoading={isLoading}
+            pagination={pagination}
+            onPaginationChange={o => setFilters(prev => ({ ...prev, offset: o }))}
+            emptyMessage="Заявки не найдены"
+          />
+        </div>
+      )}
 
       <ConfirmDialog
         open={!!deletingId}
