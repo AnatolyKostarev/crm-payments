@@ -17,12 +17,16 @@ import {
   isNavItemActive,
   mainNavItems,
 } from '@/app/config/navigation'
+import LogoIcon from '../../assets/logo.png'
+import { useState } from 'react'
 
 interface AppSidebarProps {
   onNavigate?: () => void
 }
 
 export function AppSidebar({ onNavigate }: AppSidebarProps) {
+  const [logoBroken, setLogoBroken] = useState(false)
+
   const location = useLocation()
   const { isMobile, setOpenMobile } = useSidebar()
 
@@ -38,11 +42,29 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <NavLink to="/" onClick={handleNavigate}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <span className="text-sm font-bold">CP</span>
+            <SidebarMenuButton
+              size="lg"
+              asChild
+            >
+              <NavLink
+                to="/"
+                onClick={handleNavigate}
+              >
+                <div className="mx-auto mb-0 flex h-8 w-8 items-center justify-center text-sm font-bold text-primary">
+                  {!logoBroken ? (
+                    <img
+                      src={LogoIcon}
+                      alt="CRM Payments logo"
+                      className="h-8 w-8 object-contain rounded-md"
+                      onError={() => setLogoBroken(true)}
+                    />
+                  ) : (
+                    <span className="text-sm font-bold">CP</span>
+                  )}
                 </div>
+                {/* <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <span className="text-sm font-bold">CP</span>
+                </div> */}
                 <span className="font-semibold">CRM Payments</span>
               </NavLink>
             </SidebarMenuButton>
@@ -67,7 +89,10 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
                       isActive={isActive}
                       tooltip={label}
                     >
-                      <NavLink to={to} onClick={handleNavigate}>
+                      <NavLink
+                        to={to}
+                        onClick={handleNavigate}
+                      >
                         <Icon />
                         <span>{label}</span>
                       </NavLink>
@@ -95,7 +120,10 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
                   isActive={isActive}
                   tooltip={label}
                 >
-                  <NavLink to={to} onClick={handleNavigate}>
+                  <NavLink
+                    to={to}
+                    onClick={handleNavigate}
+                  >
                     <Icon />
                     <span>{label}</span>
                   </NavLink>
