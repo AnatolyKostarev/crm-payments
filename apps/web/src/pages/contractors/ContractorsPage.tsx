@@ -105,7 +105,7 @@ export function ContractorsPage() {
       </h2>
 
       {/* Search and Add */}
-      <div className="flex shrink-0 items-center gap-3">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
         <SearchInput
           placeholder="Поиск по названию или ИНН..."
           value={search}

@@ -94,7 +94,7 @@ export function PaymentFilters({ filters, onChange }: PaymentFiltersProps) {
           })
         }
       >
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="h-10 w-[180px]">
           <SelectValue placeholder="Статус" />
         </SelectTrigger>
         <SelectContent>
@@ -115,7 +115,7 @@ export function PaymentFilters({ filters, onChange }: PaymentFiltersProps) {
           value={filters.dateFrom}
           onChange={handleDateFromChange}
           placeholder="Дата от"
-          className="w-[160px]"
+          className="h-10 w-[160px]"
         />
       </div>
       <div className="flex flex-col gap-1">
@@ -123,7 +123,7 @@ export function PaymentFilters({ filters, onChange }: PaymentFiltersProps) {
           value={filters.dateTo}
           onChange={handleDateToChange}
           placeholder="Дата до"
-          className="w-[160px]"
+          className="h-10 w-[160px]"
         />
         {dateToError && (
           <span className="text-xs text-destructive">{dateToError}</span>
@@ -133,7 +133,7 @@ export function PaymentFilters({ filters, onChange }: PaymentFiltersProps) {
       {hasFilters && (
         <Button
           variant="ghost"
-          size="sm"
+          className="h-10"
           onClick={handleClear}
         >
           <X className="mr-1 h-4 w-4" />
