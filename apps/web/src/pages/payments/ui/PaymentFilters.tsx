@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { DatePicker } from '@/shared/ui/DatePicker'
-import type { PaymentQuery, PaymentStatus } from '../../entities/payment/types'
+import type { PaymentQuery, PaymentStatus } from '../../../entities/payment/types'
 
 const statusOptions: { value: PaymentStatus; label: string }[] = [
   { value: 'DRAFT', label: 'Черновик' },
@@ -30,7 +30,6 @@ interface PaymentFiltersProps {
 export function PaymentFilters({ filters, onChange }: PaymentFiltersProps) {
   const hasFilters = filters.status || filters.dateFrom || filters.dateTo
 
-  // Вычисляем ошибки на основе текущих значений фильтров
   const dateToError = useMemo(() => {
     if (filters.dateFrom && filters.dateTo) {
       const fromDate = new Date(filters.dateFrom)
@@ -53,7 +52,6 @@ export function PaymentFilters({ filters, onChange }: PaymentFiltersProps) {
 
       if (toDate < fromDate) {
         toast.error('Дата окончания не может быть ранее даты начала')
-        // Не применяем изменение, если диапазон становится невалидным
         return
       }
     }
@@ -71,7 +69,6 @@ export function PaymentFilters({ filters, onChange }: PaymentFiltersProps) {
 
       if (toDate < fromDate) {
         toast.error('Дата окончания не может быть ранее даты начала')
-        // Не применяем изменение, если диапазон становится невалидным
         return
       }
     }

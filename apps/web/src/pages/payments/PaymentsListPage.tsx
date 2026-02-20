@@ -9,7 +9,7 @@ import {
   useSubmitPayment,
 } from '@/entities/payment/hooks'
 import { DataTable } from '@/shared/ui/DataTable'
-import { PaymentFilters } from './PaymentFilters'
+import { PaymentFilters } from './ui/PaymentFilters'
 import { PaymentEditDialog } from '@/features/manage-payment/PaymentEditDialog'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog'

@@ -14,7 +14,7 @@ import { ConfirmDialog } from '@/shared/ui/confirm-dialog'
 import { SearchInput } from '@/shared/ui/search-input'
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 import { useIsLg } from '@/shared/hooks/use-mobile'
-import { Loader2 } from 'lucide-react'
+import { PageLoadingState, PageNotFoundState } from '@/shared/ui/page-state'
 import type { Contractor } from '@/entities/contractor/types'
 import { getContractorsColumns } from './config/contractors-columns'
 import { ContractorCard } from './ui/ContractorCard'
@@ -124,13 +124,12 @@ export function ContractorsPage() {
       {!isLg && (
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {isLoading ? (
-            <div className="flex flex-1 items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
+            <PageLoadingState className="flex flex-1 items-center justify-center py-8" />
           ) : items.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              Контрагенты не найдены
-            </p>
+            <PageNotFoundState
+              message="Контрагенты не найдены"
+              className="py-8"
+            />
           ) : (
             <div className="min-h-0 flex-1 overflow-auto">
               <div className="space-y-3 pb-4">

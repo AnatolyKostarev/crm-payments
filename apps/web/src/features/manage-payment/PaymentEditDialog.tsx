@@ -1,7 +1,6 @@
 import { memo, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { usePayment, useUpdatePayment } from '@/entities/payment/hooks'
@@ -24,18 +23,11 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-
-const paymentSchema = z.object({
-  amount: z
-    .string()
-    .min(1, 'Обязательное поле')
-    .refine(v => !isNaN(Number(v)) && Number(v) >= 0.01, 'Минимум 0.01'),
-  purpose: z.string().min(1, 'Обязательное поле').max(500),
-  contractorId: z.string().min(1, 'Выберите контрагента'),
-  dueDate: z.string().optional().or(z.literal('')),
-})
-
-type PaymentForm = z.infer<typeof paymentSchema>
+import {
+  paymentFormSchema,
+  paymentFormDefaultValues,
+  type PaymentFormValues,
+} from './model/payment-form.schema'
 
 interface PaymentEditDialogProps {
   open: boolean
@@ -56,14 +48,9 @@ function PaymentEditDialogInner({
 
   const payment = paymentData?.data
 
-  const form = useForm<PaymentForm>({
-    resolver: zodResolver(paymentSchema),
-    defaultValues: {
-      amount: '',
-      purpose: '',
-      contractorId: '',
-      dueDate: '',
-    },
+  const form = useForm<PaymentFormValues>({
+    resolver: zodResolver(paymentFormSchema),
+    defaultValues: paymentFormDefaultValues,
   })
 
   useEffect(() => {
@@ -94,7 +81,7 @@ function PaymentEditDialogInner({
   const handleClose = useCallback(() => onOpenChange(false), [onOpenChange])
 
   const onSubmit = useCallback(
-    async (data: PaymentForm) => {
+    async (data: PaymentFormValues) => {
       if (!paymentId || !payment) return
 
       try {
