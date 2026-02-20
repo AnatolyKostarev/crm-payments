@@ -1,7 +1,7 @@
-import { Pencil, Trash2 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { ActionsMenu, type ActionItem } from '@/shared/ui/ActionsMenu'
+import { ActionsMenu } from '@/shared/ui/ActionsMenu'
 import type { Contractor } from '@/entities/contractor/types'
+import { getContractorActions } from '../lib/get-contractor-actions'
 
 interface ContractorCardProps {
   contractor: Contractor
@@ -14,26 +14,17 @@ export function ContractorCard({
   onEdit,
   onDeleteRequest,
 }: ContractorCardProps) {
+  const actions = getContractorActions({
+    contractor,
+    onEdit,
+    onDeleteRequest,
+  })
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <span className="font-semibold leading-tight">{contractor.name}</span>
-        <ActionsMenu
-          actions={[
-            {
-              label: 'Изменить',
-              icon: <Pencil className="h-4 w-4" />,
-              onClick: () => onEdit(contractor),
-            },
-            {
-              label: 'Удалить',
-              icon: <Trash2 className="h-4 w-4" />,
-              onClick: () => onDeleteRequest(contractor.id),
-              variant: 'destructive',
-              separator: true,
-            },
-          ]}
-        />
+        <ActionsMenu actions={actions} />
       </CardHeader>
       <CardContent className="space-y-1.5 text-sm">
         <div className="flex justify-between gap-2">

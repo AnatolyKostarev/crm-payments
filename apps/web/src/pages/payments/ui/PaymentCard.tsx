@@ -1,8 +1,8 @@
-import { Eye, Pencil, Send, Trash2 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { StatusBadge } from '@/entities/payment/ui/StatusBadge'
 import type { Payment } from '@/entities/payment/types'
-import { ActionsMenu, type ActionItem } from '@/shared/ui/ActionsMenu'
+import { ActionsMenu } from '@/shared/ui/ActionsMenu'
+import { getPaymentActions } from '../lib/get-payment-actions'
 
 interface PaymentCardProps {
   payment: Payment
@@ -23,35 +23,14 @@ export function PaymentCard({
   onDeleteRequest,
   isSubmitting,
 }: PaymentCardProps) {
-  const actions: ActionItem[] = [
-    {
-      label: 'Просмотр',
-      icon: <Eye className="h-4 w-4" />,
-      onClick: () => onView(payment.id),
-    },
-    ...(payment.status === 'DRAFT'
-      ? [
-          {
-            label: 'Изменить',
-            icon: <Pencil className="h-4 w-4" />,
-            onClick: () => onEdit(payment.id),
-          },
-          {
-            label: 'На согласование',
-            icon: <Send className="h-4 w-4" />,
-            onClick: () => onSubmit(payment.id),
-            disabled: isSubmitting,
-          },
-          {
-            label: 'Удалить',
-            icon: <Trash2 className="h-4 w-4" />,
-            onClick: () => onDeleteRequest(payment.id),
-            variant: 'destructive' as const,
-            separator: true,
-          },
-        ]
-      : []),
-  ]
+  const actions = getPaymentActions({
+    payment,
+    onView,
+    onEdit,
+    onSubmit,
+    onDeleteRequest,
+    isSubmitting,
+  })
 
   return (
     <Card>

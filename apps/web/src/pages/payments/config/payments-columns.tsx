@@ -1,8 +1,8 @@
 import type { ColumnDef } from '@tanstack/react-table'
-import { Eye, Pencil, Send, Trash2 } from 'lucide-react'
 import { StatusBadge } from '@/entities/payment/ui/StatusBadge'
 import type { Payment } from '@/entities/payment/types'
-import { ActionsMenu, type ActionItem } from '@/shared/ui/ActionsMenu'
+import { ActionsMenu } from '@/shared/ui/ActionsMenu'
+import { getPaymentActions } from '../lib/get-payment-actions'
 
 export interface PaymentsColumnsParams {
   formatAmount: (amount: string, currency: string) => string
@@ -94,35 +94,14 @@ export function getPaymentsColumns({
       header: '',
       cell: ({ row }) => {
         const p = row.original
-        const actions: ActionItem[] = [
-          {
-            label: 'Просмотр',
-            icon: <Eye className="h-4 w-4" />,
-            onClick: () => onView(p.id),
-          },
-          ...(p.status === 'DRAFT'
-            ? [
-                {
-                  label: 'Изменить',
-                  icon: <Pencil className="h-4 w-4" />,
-                  onClick: () => onEdit(p.id),
-                },
-                {
-                  label: 'На согласование',
-                  icon: <Send className="h-4 w-4" />,
-                  onClick: () => onSubmit(p.id),
-                  disabled: isSubmitting,
-                },
-                {
-                  label: 'Удалить',
-                  icon: <Trash2 className="h-4 w-4" />,
-                  onClick: () => onDeleteRequest(p.id),
-                  variant: 'destructive' as const,
-                  separator: true,
-                },
-              ]
-            : []),
-        ]
+        const actions = getPaymentActions({
+          payment: p,
+          onView,
+          onEdit,
+          onSubmit,
+          onDeleteRequest,
+          isSubmitting,
+        })
 
         return (
           <div className="flex justify-end">
