@@ -1,6 +1,10 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router'
-import { useReactTable, getCoreRowModel } from '@tanstack/react-table'
+import {
+  useReactTable,
+  getCoreRowModel,
+  type VisibilityState,
+} from '@tanstack/react-table'
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -10,6 +14,8 @@ import {
 } from '@/entities/payment/hooks'
 import { DataTable } from '@/shared/ui/DataTable'
 import { usePersistedColumnSizing } from '@/shared/hooks/use-persisted-column-sizing'
+import { usePersistedColumnPreferences } from '@/shared/hooks/use-persisted-column-preferences'
+import { ColumnSettingsDialog } from '@/shared/ui/ColumnSettingsDialog'
 import { PaymentFilters } from './ui/PaymentFilters'
 import { PaymentDateFilterDialog } from './ui/PaymentDateFilterDialog'
 import { PaymentContractorFilterDialog } from './ui/PaymentContractorFilterDialog'
@@ -18,9 +24,13 @@ import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog'
 import type { PaymentQuery } from '../../entities/payment/types'
 import { getPaymentsColumns } from './config/payments-columns'
-
-const PAYMENTS_COLUMN_SIZING_STORAGE_KEY = 'table-column-sizing:payments'
-const MIN_COLUMN_SIZE = 96
+import {
+  PAYMENTS_COLUMN_SIZING_STORAGE_KEY,
+  PAYMENTS_COLUMN_PREFERENCES_STORAGE_KEY,
+  PAYMENTS_MIN_COLUMN_SIZE,
+  PAYMENTS_CONFIGURABLE_COLUMNS,
+  PAYMENTS_CONFIGURABLE_COLUMN_IDS,
+} from './config/column-settings'
 
 export function PaymentsListPage() {
   const navigate = useNavigate()
@@ -30,6 +40,17 @@ export function PaymentsListPage() {
   const { columnSizing, setColumnSizing } = usePersistedColumnSizing(
     PAYMENTS_COLUMN_SIZING_STORAGE_KEY
   )
+  const {
+    columnOrder,
+    setColumnOrder,
+    columnVisibility,
+    setColumnVisibility,
+    defaultColumnOrder,
+    defaultColumnVisibility,
+  } = usePersistedColumnPreferences({
+    storageKey: PAYMENTS_COLUMN_PREFERENCES_STORAGE_KEY,
+    columnIds: PAYMENTS_CONFIGURABLE_COLUMN_IDS,
+  })
 
   const { data, isLoading } = usePayments(filters)
   const deleteMutation = useDeletePayment()
@@ -132,15 +153,29 @@ export function PaymentsListPage() {
     ]
   )
 
+  const handleColumnSettingsApply = useCallback(
+    (next: { columnOrder: string[]; columnVisibility: VisibilityState }) => {
+      setColumnOrder(next.columnOrder)
+      setColumnVisibility(next.columnVisibility)
+    },
+    [setColumnOrder, setColumnVisibility]
+  )
+
+  const tableColumnOrder = useMemo(() => {
+    return [...columnOrder, 'actions']
+  }, [columnOrder])
+
   const table = useReactTable({
     data: items,
     columns,
     getCoreRowModel: getCoreRowModel(),
     defaultColumn: {
-      minSize: MIN_COLUMN_SIZE,
+      minSize: PAYMENTS_MIN_COLUMN_SIZE,
     },
-    state: { columnSizing },
+    state: { columnSizing, columnVisibility, columnOrder: tableColumnOrder },
     onColumnSizingChange: setColumnSizing,
+    onColumnVisibilityChange: setColumnVisibility,
+    onColumnOrderChange: setColumnOrder,
     columnResizeMode: 'onChange',
     enableColumnResizing: true,
   })
@@ -156,13 +191,23 @@ export function PaymentsListPage() {
           filters={filters}
           onChange={f => setFilters({ ...f, offset: 0 })}
         />
-        <Button
-          className="h-10"
-          onClick={() => navigate('/payments/create')}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Создать заявку
-        </Button>
+        <div className="flex items-center gap-2">
+          <ColumnSettingsDialog
+            items={[...PAYMENTS_CONFIGURABLE_COLUMNS]}
+            columnOrder={columnOrder}
+            columnVisibility={columnVisibility}
+            defaultColumnOrder={defaultColumnOrder}
+            defaultColumnVisibility={defaultColumnVisibility}
+            onApply={handleColumnSettingsApply}
+          />
+          <Button
+            className="h-10"
+            onClick={() => navigate('/payments/create')}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Создать заявку
+          </Button>
+        </div>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">

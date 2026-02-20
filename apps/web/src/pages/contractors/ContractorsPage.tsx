@@ -1,5 +1,9 @@
 import { useState, useMemo, useCallback, useRef } from 'react'
-import { useReactTable, getCoreRowModel } from '@tanstack/react-table'
+import {
+  useReactTable,
+  getCoreRowModel,
+  type VisibilityState,
+} from '@tanstack/react-table'
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -15,15 +19,22 @@ import { SearchInput } from '@/shared/ui/search-input'
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 import { useIsLg } from '@/shared/hooks/use-mobile'
 import { usePersistedColumnSizing } from '@/shared/hooks/use-persisted-column-sizing'
+import { usePersistedColumnPreferences } from '@/shared/hooks/use-persisted-column-preferences'
 import { PageLoadingState, PageNotFoundState } from '@/shared/ui/page-state'
 import type { Contractor } from '@/entities/contractor/types'
 import { getContractorsColumns } from './config/contractors-columns'
 import { ContractorCard } from './ui/ContractorCard'
+import { ColumnSettingsDialog } from '@/shared/ui/ColumnSettingsDialog'
+import {
+  CONTRACTORS_COLUMN_SIZING_STORAGE_KEY,
+  CONTRACTORS_COLUMN_PREFERENCES_STORAGE_KEY,
+  CONTRACTORS_MIN_COLUMN_SIZE,
+  CONTRACTORS_CONFIGURABLE_COLUMNS,
+  CONTRACTORS_CONFIGURABLE_COLUMN_IDS,
+} from './config/column-settings'
 
 const SEARCH_DEBOUNCE_MS = 300
 const EMPTY_ITEMS: Contractor[] = []
-const CONTRACTORS_COLUMN_SIZING_STORAGE_KEY = 'table-column-sizing:contractors'
-const MIN_COLUMN_SIZE = 96
 
 export function ContractorsPage() {
   const [search, setSearch] = useState('')
@@ -37,6 +48,17 @@ export function ContractorsPage() {
   const { columnSizing, setColumnSizing } = usePersistedColumnSizing(
     CONTRACTORS_COLUMN_SIZING_STORAGE_KEY
   )
+  const {
+    columnOrder,
+    setColumnOrder,
+    columnVisibility,
+    setColumnVisibility,
+    defaultColumnOrder,
+    defaultColumnVisibility,
+  } = usePersistedColumnPreferences({
+    storageKey: CONTRACTORS_COLUMN_PREFERENCES_STORAGE_KEY,
+    columnIds: CONTRACTORS_CONFIGURABLE_COLUMN_IDS,
+  })
 
   const { data, isLoading } = useContractors({
     search: debouncedSearch || undefined,
@@ -87,11 +109,19 @@ export function ContractorsPage() {
   }, [deleteContractor])
 
   const onDeleteRequest = useCallback((id: string) => setDeletingId(id), [])
+  const handleColumnSettingsApply = useCallback(
+    (next: { columnOrder: string[]; columnVisibility: VisibilityState }) => {
+      setColumnOrder(next.columnOrder)
+      setColumnVisibility(next.columnVisibility)
+    },
+    [setColumnOrder, setColumnVisibility]
+  )
 
   const columns = useMemo(
     () => getContractorsColumns({ onEdit: handleEdit, onDeleteRequest }),
     [handleEdit, onDeleteRequest]
   )
+  const tableColumnOrder = useMemo(() => [...columnOrder, 'actions'], [columnOrder])
 
   const tableOptions = useMemo(
     () => ({
@@ -99,14 +129,25 @@ export function ContractorsPage() {
       columns,
       getCoreRowModel: getCoreRowModel(),
       defaultColumn: {
-        minSize: MIN_COLUMN_SIZE,
+        minSize: CONTRACTORS_MIN_COLUMN_SIZE,
       },
-      state: { columnSizing },
+      state: { columnSizing, columnVisibility, columnOrder: tableColumnOrder },
       onColumnSizingChange: setColumnSizing,
+      onColumnVisibilityChange: setColumnVisibility,
+      onColumnOrderChange: setColumnOrder,
       columnResizeMode: 'onChange' as const,
       enableColumnResizing: true,
     }),
-    [items, columns, columnSizing, setColumnSizing]
+    [
+      items,
+      columns,
+      columnSizing,
+      columnVisibility,
+      tableColumnOrder,
+      setColumnSizing,
+      setColumnVisibility,
+      setColumnOrder,
+    ]
   )
   const table = useReactTable(tableOptions)
   const isLg = useIsLg()
@@ -124,13 +165,25 @@ export function ContractorsPage() {
           value={search}
           onChange={handleSearchChange}
         />
-        <Button
-          onClick={handleCreate}
-          className="h-10"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Добавить
-        </Button>
+        <div className="flex items-center gap-2">
+          {isLg && (
+            <ColumnSettingsDialog
+              items={[...CONTRACTORS_CONFIGURABLE_COLUMNS]}
+              columnOrder={columnOrder}
+              columnVisibility={columnVisibility}
+              defaultColumnOrder={defaultColumnOrder}
+              defaultColumnVisibility={defaultColumnVisibility}
+              onApply={handleColumnSettingsApply}
+            />
+          )}
+          <Button
+            onClick={handleCreate}
+            className="h-10"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Добавить
+          </Button>
+        </div>
       </div>
 
       {/* До 1024px — только карточки (таблица не рендерится, нет дублирования и переполнения) */}

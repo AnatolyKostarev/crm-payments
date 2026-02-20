@@ -39,6 +39,7 @@ export function DataTable<TData>({
     (sum, column) => sum + column.getSize(),
     0
   )
+  const visibleColumnCount = visibleLeafColumns.length || columns.length
 
   const getColumnWidth = (size: number) => {
     if (!totalColumnsWidth) return undefined
@@ -87,7 +88,7 @@ export function DataTable<TData>({
             {isLoading ? (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={visibleColumnCount}
                   className="h-24 text-center"
                 >
                   <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
@@ -113,7 +114,7 @@ export function DataTable<TData>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={visibleColumnCount}
                   className="h-24 text-center text-muted-foreground"
                 >
                   {emptyMessage}
