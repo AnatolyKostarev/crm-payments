@@ -46,7 +46,7 @@ export function getPaymentsColumns({
       accessorKey: 'purpose',
       header: 'Назначение платежа',
       cell: ({ row }) => (
-        <div className="max-w-[300px]">
+        <div className="max-w-full">
           <p className="truncate font-medium">{row.original.purpose}</p>
         </div>
       ),

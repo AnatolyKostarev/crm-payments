@@ -9,6 +9,7 @@ import {
   useSubmitPayment,
 } from '@/entities/payment/hooks'
 import { DataTable } from '@/shared/ui/DataTable'
+import { usePersistedColumnSizing } from '@/shared/hooks/use-persisted-column-sizing'
 import { PaymentFilters } from './ui/PaymentFilters'
 import { PaymentDateFilterDialog } from './ui/PaymentDateFilterDialog'
 import { PaymentContractorFilterDialog } from './ui/PaymentContractorFilterDialog'
@@ -18,11 +19,17 @@ import { ConfirmDialog } from '@/shared/ui/confirm-dialog'
 import type { PaymentQuery } from '../../entities/payment/types'
 import { getPaymentsColumns } from './config/payments-columns'
 
+const PAYMENTS_COLUMN_SIZING_STORAGE_KEY = 'table-column-sizing:payments'
+const MIN_COLUMN_SIZE = 96
+
 export function PaymentsListPage() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<PaymentQuery>({ offset: 0, limit: 20 })
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null)
+  const { columnSizing, setColumnSizing } = usePersistedColumnSizing(
+    PAYMENTS_COLUMN_SIZING_STORAGE_KEY
+  )
 
   const { data, isLoading } = usePayments(filters)
   const deleteMutation = useDeletePayment()
@@ -129,6 +136,13 @@ export function PaymentsListPage() {
     data: items,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    defaultColumn: {
+      minSize: MIN_COLUMN_SIZE,
+    },
+    state: { columnSizing },
+    onColumnSizingChange: setColumnSizing,
+    columnResizeMode: 'onChange',
+    enableColumnResizing: true,
   })
 
   return (

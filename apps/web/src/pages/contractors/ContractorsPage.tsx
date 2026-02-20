@@ -14,6 +14,7 @@ import { ConfirmDialog } from '@/shared/ui/confirm-dialog'
 import { SearchInput } from '@/shared/ui/search-input'
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 import { useIsLg } from '@/shared/hooks/use-mobile'
+import { usePersistedColumnSizing } from '@/shared/hooks/use-persisted-column-sizing'
 import { PageLoadingState, PageNotFoundState } from '@/shared/ui/page-state'
 import type { Contractor } from '@/entities/contractor/types'
 import { getContractorsColumns } from './config/contractors-columns'
@@ -21,6 +22,8 @@ import { ContractorCard } from './ui/ContractorCard'
 
 const SEARCH_DEBOUNCE_MS = 300
 const EMPTY_ITEMS: Contractor[] = []
+const CONTRACTORS_COLUMN_SIZING_STORAGE_KEY = 'table-column-sizing:contractors'
+const MIN_COLUMN_SIZE = 96
 
 export function ContractorsPage() {
   const [search, setSearch] = useState('')
@@ -31,6 +34,9 @@ export function ContractorsPage() {
     null
   )
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const { columnSizing, setColumnSizing } = usePersistedColumnSizing(
+    CONTRACTORS_COLUMN_SIZING_STORAGE_KEY
+  )
 
   const { data, isLoading } = useContractors({
     search: debouncedSearch || undefined,
@@ -92,8 +98,15 @@ export function ContractorsPage() {
       data: items,
       columns,
       getCoreRowModel: getCoreRowModel(),
+      defaultColumn: {
+        minSize: MIN_COLUMN_SIZE,
+      },
+      state: { columnSizing },
+      onColumnSizingChange: setColumnSizing,
+      columnResizeMode: 'onChange' as const,
+      enableColumnResizing: true,
     }),
-    [items, columns]
+    [items, columns, columnSizing, setColumnSizing]
   )
   const table = useReactTable(tableOptions)
   const isLg = useIsLg()

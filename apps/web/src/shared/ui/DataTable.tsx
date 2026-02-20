@@ -34,21 +34,50 @@ export function DataTable<TData>({
   onPaginationChange,
   emptyMessage = 'Нет данных',
 }: DataTableProps<TData>) {
+  const visibleLeafColumns = table.getVisibleLeafColumns()
+  const totalColumnsWidth = visibleLeafColumns.reduce(
+    (sum, column) => sum + column.getSize(),
+    0
+  )
+
+  const getColumnWidth = (size: number) => {
+    if (!totalColumnsWidth) return undefined
+    return `${(size / totalColumnsWidth) * 100}%`
+  }
+
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
       <div className="min-h-0 flex-1 overflow-auto rounded-md border">
-        <Table>
+        <Table className="min-w-full table-fixed">
           <TableHeader>
             {table.getHeaderGroups().map(hg => (
               <TableRow key={hg.id} className="sticky top-0 z-10 border-b bg-muted/50 backdrop-blur supports-backdrop-filter:bg-muted/80">
                 {hg.headers.map(header => (
-                  <TableHead key={header.id} className="bg-inherit">
+                  <TableHead
+                    key={header.id}
+                    className="relative overflow-hidden bg-inherit text-ellipsis"
+                    style={{ width: getColumnWidth(header.getSize()) }}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
                           header.getContext()
                         )}
+                    {header.column.getCanResize() && (
+                      <div
+                        onDoubleClick={() => header.column.resetSize()}
+                        onMouseDown={header.getResizeHandler()}
+                        onTouchStart={header.getResizeHandler()}
+                        className={cn(
+                          'absolute right-0 top-0 h-full w-2 select-none touch-none cursor-col-resize',
+                          table.getState().columnSizingInfo.isResizingColumn ===
+                            header.column.id
+                            ? 'bg-primary/60'
+                            : 'bg-transparent hover:bg-primary/40'
+                        )}
+                      />
+                    )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -68,7 +97,11 @@ export function DataTable<TData>({
               table.getRowModel().rows.map(row => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className="overflow-hidden text-ellipsis"
+                      style={{ width: getColumnWidth(cell.column.getSize()) }}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
