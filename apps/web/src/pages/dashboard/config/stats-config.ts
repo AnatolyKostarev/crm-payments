@@ -5,6 +5,7 @@ export interface StatCard {
   key: 'payments' | 'pendingApproval' | 'registries' | 'contractors'
   label: string
   description: string
+  to: string
   icon: LucideIcon
   iconBg: string
   iconColor: string
@@ -15,6 +16,7 @@ export const statsConfig: StatCard[] = [
     key: 'payments',
     label: 'Заявки',
     description: 'Всего заявок на оплату',
+    to: '/payments',
     icon: FileText,
     iconBg: 'bg-blue-100 dark:bg-blue-900/40',
     iconColor: 'text-blue-600 dark:text-blue-400',
@@ -23,6 +25,7 @@ export const statsConfig: StatCard[] = [
     key: 'pendingApproval',
     label: 'На согласовании',
     description: 'Ожидают решения',
+    to: '/approvals',
     icon: CheckSquare,
     iconBg: 'bg-amber-100 dark:bg-amber-900/40',
     iconColor: 'text-amber-600 dark:text-amber-400',
@@ -31,6 +34,7 @@ export const statsConfig: StatCard[] = [
     key: 'registries',
     label: 'Реестры',
     description: 'Сформировано реестров',
+    to: '/registries',
     icon: ClipboardList,
     iconBg: 'bg-green-100 dark:bg-green-900/40',
     iconColor: 'text-green-600 dark:text-green-400',
@@ -39,6 +43,7 @@ export const statsConfig: StatCard[] = [
     key: 'contractors',
     label: 'Контрагенты',
     description: 'Активных контрагентов',
+    to: '/contractors',
     icon: Users,
     iconBg: 'bg-violet-100 dark:bg-violet-900/40',
     iconColor: 'text-violet-600 dark:text-violet-400',
